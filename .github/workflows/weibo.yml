@@ -1,0 +1,36 @@
+name: 微博推飞书
+
+on:
+  schedule:
+    # 每 15 分钟跑一次
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}   # 允许手动点 “Run workflow” 测试
+
+permissions:
+  contents: write         # 允许回写 state.json（记录已推送进度）
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: 装依赖
+        run: pip install requests
+      - name: 抓微博并推送
+        env:
+          WEIBO_UID: ${{ secrets.WEIBO_UID }}
+          WEIBO_COOKIE: ${{ secrets.WEIBO_COOKIE }}
+          FEISHU_WEBHOOK: ${{ secrets.FEISHU_WEBHOOK }}
+        run: python push.py
+      - name: 保存推送进度
+        run: |
+          git add -A
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions"
+            git config user.email "actions@github.com"
+            git commit -m "update state [skip ci]"
+            git push
+          fi
