@@ -3,7 +3,7 @@ name: 微博推飞书
 on:
   schedule:
     # 每 5 分钟跑一次
-    - cron: '*/15 * * * *'
+    - cron: '*/5 * * * *'
   workflow_dispatch: {}   # 允许手动点 “Run workflow” 测试
 
 permissions:
